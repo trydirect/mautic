@@ -1,0 +1,29 @@
+#this file dosn't work properly, it was created for show differents between syntax docker-compose v2 and v1
+version: '2'
+services:
+
+   mauticdb:
+     image: mysql:5.6
+     volumes:
+       - "./.data/db:/var/lib/mysql"
+     restart: always
+     environment:
+        MYSQL_ROOT_PASSWORD: Ohtheigo8h
+        MYSQL_DATABASE: mautic
+        MYSQL_USER: root
+        MYSQL_PASSWORD: Ael2Au7Sai
+   
+   mautic:
+     depends_on:
+       - mauticdb
+     image: mautic/mautic
+     links:
+       - mauticdb
+     ports:
+       - "82:80"
+     restart: always
+     environment: 
+        MAUTIC_DB_HOST: mauticdb:3306
+        MAUTIC_DB_USER: root
+        MAUTIC_DB_NAME: mautic
+        MAUTIC_DB_PASSWORD: Ael2Au7Sai

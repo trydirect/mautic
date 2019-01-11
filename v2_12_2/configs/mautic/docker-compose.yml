@@ -1,0 +1,31 @@
+version: '2'
+
+volumes:
+    mautic-db:
+      driver: local
+
+services:
+
+  mauticdb:
+    image: mysql:5.6
+    restart: always
+    environment:
+         MYSQL_ROOT_PASSWORD: {{mapass}}
+         MYSQL_DATABASE: mautic
+         MYSQL_USER: root
+         MYSQL_PASSWORD: {{mapass}}
+    volumes:
+         - mautic-db:/var/lib/mysql
+  mautic:
+    image: optimum/apache-mautic:2.2.1
+    restart: always
+    links:
+      - mauticdb
+    ports:
+      - 82:80
+    environment:
+      MAUTIC_DB_HOST: mauticdb
+      MYSQL_PORT_3306_TCP: 3306
+      MAUTIC_DB_USER: root
+      MAUTIC_DB_PASSWORD: {{mapass}}
+      MAUTIC_DB_NAME: mautic

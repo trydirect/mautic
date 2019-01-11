@@ -1,0 +1,9 @@
+version: "2"
+
+services:
+
+  mautic:
+    image: optimum/apache-mautic:2.12.2
+    build: .
+    container_name: mautic
+    restart: always
