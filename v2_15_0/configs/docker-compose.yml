@@ -5,16 +5,16 @@ volumes:
       driver: local
 
 services:
-
-  mailu-http:
-    image: ${REGISTRY}mailu/$FRONTEND:$VERSION
-    restart: always
-    env_file: .env
-    ports:
-      - "$BIND_ADDRESS:84:80"
-      - "$BIND_ADDRESS:7444:443"
-    volumes:
-      - ./certs/ssl:/certs
+#
+#  mailu-http:
+#    image: ${REGISTRY}mailu/$FRONTEND:$VERSION
+#    restart: always
+#    env_file: .env
+#    ports:
+#      - "$BIND_ADDRESS:84:80"
+#      - "$BIND_ADDRESS:7444:443"
+#    volumes:
+#      - ./certs/ssl:/certs
 
   redis:
     image: redis:latest
@@ -22,105 +22,96 @@ services:
     volumes:
       - $ROOT/redis:/data
 
-  imap:
-    image: ${REGISTRY}mailu/dovecot:$VERSION
-    restart: always
-    env_file: .env
-    ports:
-      - "$BIND_ADDRESS:110:110"
-      - "$BIND_ADDRESS:143:143"
-      - "$BIND_ADDRESS:993:993"
-      - "$BIND_ADDRESS:995:995"
-      - "$BIND_ADDRESS:4190:4190"
-    volumes:
-      - $ROOT/data:/data
-      - $ROOT/mail:/mail
-      - ./certs/ssl:/certs
-      - $ROOT/overrides:/overrides
-
-  smtp:
-    image: ${REGISTRY}mailu/postfix:$VERSION
-    restart: always
-    env_file: .env
-    ports:
-      - "$BIND_ADDRESS:25:25"
-      - "$BIND_ADDRESS:465:465"
-      - "$BIND_ADDRESS:587:587"
-    volumes:
-      - "$ROOT/data:/data"
-      - "$ROOT/certs:/certs"
-      - "$ROOT/overrides:/overrides"
-
-  milter:
-    image: ${REGISTRY}mailu/rmilter:$VERSION
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/filter:/data"
-      - "$ROOT/dkim:/dkim"
-      - "$ROOT/overrides:/overrides"
-
-  antispam:
-    # build: rspamd
-    image: ${REGISTRY}mailu/rspamd:$VERSION
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/filter:/var/lib/rspamd"
-
-  antivirus:
-    image: ${REGISTRY}mailu/clamav:$VERSION
-    env_file: .env
-    volumes:
-      - "$ROOT/filter:/data"
-
-  webdav:
-    image: ${REGISTRY}mailu/$WEBDAV:$VERSION
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/dav:/data"
-
-  admin:
-    image: ${REGISTRY}mailu/admin:$VERSION
-    container_name: mailu_admin
-    restart: always
-    env_file: .env
-    ports:
-      - "$BIND_ADDRESS:8000:80"
-    volumes:
-      - "$ROOT/data:/data"
-      - "$ROOT/dkim:/dkim"
-      - "$ROOT/certs:/certs"
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
-  webmail:
-    image: "${REGISTRY}mailu/$WEBMAIL:$VERSION"
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/webmail:/data"
-
-  fetchmail:
-    image: ${REGISTRY}mailu/fetchmail:$VERSION
-    restart: always
-    env_file: .env
-    volumes:
-      - "$ROOT/data:/data"
+#  imap:
+#    image: ${REGISTRY}mailu/dovecot:$VERSION
+#    restart: always
+#    env_file: .env
+#    ports:
+#      - "$BIND_ADDRESS:110:110"
+#      - "$BIND_ADDRESS:143:143"
+#      - "$BIND_ADDRESS:993:993"
+#      - "$BIND_ADDRESS:995:995"
+#      - "$BIND_ADDRESS:4190:4190"
+#    volumes:
+#      - $ROOT/data:/data
+#      - $ROOT/mail:/mail
+#      - ./certs/ssl:/certs
+#      - $ROOT/overrides:/overrides
+#
+#  smtp:
+#    image: ${REGISTRY}mailu/postfix:$VERSION
+#    restart: always
+#    env_file: .env
+#    ports:
+#      - "$BIND_ADDRESS:25:25"
+#      - "$BIND_ADDRESS:465:465"
+#      - "$BIND_ADDRESS:587:587"
+#    volumes:
+#      - "$ROOT/data:/data"
+#      - "$ROOT/certs:/certs"
+#      - "$ROOT/overrides:/overrides"
+#
+#  antispam:
+#    # build: rspamd
+#    image: ${REGISTRY}mailu/rspamd:$VERSION
+#    restart: always
+#    env_file: .env
+#    volumes:
+#      - "$ROOT/filter:/var/lib/rspamd"
+#
+#  antivirus:
+#    image: ${REGISTRY}mailu/clamav:$VERSION
+#    env_file: .env
+#    volumes:
+#      - "$ROOT/filter:/data"
+#
+#  webdav:
+#    image: ${REGISTRY}mailu/$WEBDAV:$VERSION
+#    restart: always
+#    env_file: .env
+#    volumes:
+#      - "$ROOT/dav:/data"
+#
+#  admin:
+#    image: ${REGISTRY}mailu/admin:$VERSION
+#    container_name: mailu_admin
+#    restart: always
+#    env_file: .env
+#    ports:
+#      - "$BIND_ADDRESS:8000:80"
+#    volumes:
+#      - "$ROOT/data:/data"
+#      - "$ROOT/dkim:/dkim"
+#      - "$ROOT/certs:/certs"
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#
+#  webmail:
+#    image: "${REGISTRY}mailu/$WEBMAIL:$VERSION"
+#    restart: always
+#    env_file: .env
+#    volumes:
+#      - "$ROOT/webmail:/data"
+#
+#  fetchmail:
+#    image: ${REGISTRY}mailu/fetchmail:$VERSION
+#    restart: always
+#    env_file: .env
+#    volumes:
+#      - "$ROOT/data:/data"
 
   mauticdb:
     image: mysql:5.6
     restart: always
     environment:
-         MYSQL_ROOT_PASSWORD: {{ma_db_root}}
+         MYSQL_ROOT_PASSWORD: mautic
          MYSQL_DATABASE: mautic
          MYSQL_USER: mautic
-         MYSQL_PASSWORD: {{mapass}}
+         MYSQL_PASSWORD: mautic
     volumes:
          - mautic-db:/var/lib/mysql
 
   mautic:
-    image: ${REGISTRY}optimum/apache-mautic:2.15.0
+    image: ${REGISTRY}trydirect/mautic:2.15.0
     container_name: mautic
     restart: always
     links:
@@ -131,23 +122,23 @@ services:
       MAUTIC_DB_HOST: mauticdb
       MYSQL_PORT_3306_TCP: 3306
       MAUTIC_DB_USER: mautic
-      MAUTIC_DB_PASSWORD: {{mapass}}
+      MAUTIC_DB_PASSWORD: mautic
       MAUTIC_DB_NAME: mautic
 
 # entry point
   nginx:
-    image: ${REGISTRY}nginx-le:stable
+    image: ${REGISTRY}trydirect/nginx:latest
     container_name: nginx
     restart: always
     depends_on:
       - mautic
-      - mailu-http
+#      - mailu-http
     ports:
       - "80:80"
       - "443:443"
     links:
       - mautic
-      - mailu-http
+#      - mailu-http
     volumes:
       - ./certs/ssl:/etc/nginx/ssl
       - ./certs/letsencrypt:/etc/letsencrypt
