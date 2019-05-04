@@ -51,6 +51,12 @@ WORKDIR /usr/src/mautic
 RUN git fetch --all --tags
 RUN git checkout tags/2.15.0 -b 2.15.0
 
+RUN sed -i -e "s/;cgi.fix_pathinfo\s*=\s*1/cgi.fix_pathinfo = 0/g; s/expose_php\s*=\s*On/expose_php = Off/g" \
+/etc/php7/fpm/php.ini
+RUN sed -i -e "s/expose_php\s*=\s*On/expose_php = Off/g" /etc/php7/fpm/php.ini
+RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g; s/post_max_size\s*=\s*8M/post_max_size = 100M/g" \
+
+/etc/php7/fpm/php.ini
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
 RUN composer install
