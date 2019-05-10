@@ -1,3 +1,8 @@
+![Docker Stars](https://img.shields.io/docker/stars/trydirect/mautic.svg)
+![Docker Pulls](https://img.shields.io/docker/pulls/trydirect/mautic.svg)
+![Docker Automated](https://img.shields.io/docker/cloud/automated/trydirect/mautic.svg)
+![Docker Build](https://img.shields.io/docker/cloud/build/trydirect/mautic.svg)
+
 # mautic
 Deploy Mautic with docker-compose.yml
 
