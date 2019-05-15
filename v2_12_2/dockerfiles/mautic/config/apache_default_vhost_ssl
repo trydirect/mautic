@@ -8,9 +8,14 @@
     allow from all
   </Directory>
 
-  ErrorLog ${APACHE_LOG_DIR}/error-ssl.log
-  LogLevel warn
-  CustomLog ${APACHE_LOG_DIR}/access-ssl.log combined
+
+ LogLevel warn
+ #ErrorLog ${APACHE_LOG_DIR}/error.log
+ ErrorLog /dev/stderr
+
+ # CustomLog ${APACHE_LOG_DIR}/access.log combined
+ CustomLog /dev/stdout combined
+ TransferLog /dev/stdout
 
   SSLEngine on
   SSLCertificateFile "/etc/apache2/ssl/demo.loc.crt"
