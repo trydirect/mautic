@@ -63,7 +63,7 @@ assert 'Location: http://localhost/index.php/installer' in curl.output.decode()
 # @todo run mautic unit test, first copy .env.dist to .env
 #php_conf = php.exec_run("bin/phpunit --bootstrap vendor/autoload.php --configuration app/phpunit.xml.dist")
 
-db = client.containers.get('build_mauticdb_1')
+db = client.containers.get('db')
 assert db.status == 'running'
 cnf = db.exec_run("/usr/sbin/mysqld --verbose  --help")
 assert 'mysqld  Ver 5.6' in cnf.output.decode()
