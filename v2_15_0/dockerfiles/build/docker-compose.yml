@@ -28,6 +28,7 @@ services:
     restart: always
     links:
       - db
+      - redis
     ports:
       - "80"
     env_file: .env
