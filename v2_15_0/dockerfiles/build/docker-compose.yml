@@ -28,12 +28,7 @@ services:
       - mauticdb
     ports:
       - "80"
-    environment:
-      - MAUTIC_DB_HOST=mauticdb
-      - MYSQL_PORT_3306_TCP=3306
-      - MAUTIC_DB_USER=mautic
-      - MAUTIC_DB_PASSWORD=mautic
-      - MAUTIC_DB_NAME=mautic
+    env_file: .env
 #    volumes:
 #      - "./mautic:/var/www/html"
 
