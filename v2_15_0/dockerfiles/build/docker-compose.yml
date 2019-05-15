@@ -3,6 +3,8 @@ version: "2"
 volumes:
   mautic-db:
     driver: local
+  redis-data:
+    driver: local
 
 services:
 
@@ -10,9 +12,9 @@ services:
     image: redis:latest
     restart: always
     volumes:
-      - $ROOT/redis:/data
+      - redis-data:/data
 
-  mauticdb:
+  db:
     image: mysql:5.6
     restart: always
     env_file: .env
@@ -25,7 +27,7 @@ services:
     container_name: mautic
     restart: always
     links:
-      - mauticdb
+      - db
     ports:
       - "80"
     env_file: .env
@@ -35,7 +37,7 @@ services:
   # entry point
   nginx:
     image: trydirect/nginx
-    container_name: mautic-nginx
+    container_name: nginx
     restart: always
     depends_on:
       - mautic

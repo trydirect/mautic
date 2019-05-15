@@ -22,45 +22,54 @@ time.sleep(20)  # we expect all containers are up and running in 20 secs
 # assert "location = /.well-known/acme-challenge/" in nginx_cfg.output.decode()
 # assert 'HTTP/1.1" 500' not in nginx.logs()
 
+# Apache
+apache = client.containers.get('mautic')
+cfg = apache.exec_run("apachectl -t")
+assert apache.status == 'running'
+# assert 'server_name _;' in nginx_cfg.output.decode()
+# assert "error_log /proc/self/fd/2" in nginx_cfg.output.decode()
+assert 'HTTP/1.1" 500' not in apache.logs()
 # test restart
-# nginx.restart()
-# time.sleep(3)
-# assert nginx.status == 'running'
+apache.restart()
+time.sleep(3)
+assert apache.status == 'running'
 
-# Symfony PHP
-php = client.containers.get('php')
+# # PHP-FPM
+# php = client.containers.get('php')
+# php_log = php.logs()
+# assert php.status == 'running'
+# php_conf = php.exec_run("php-fpm -t")
+# assert 'configuration file /usr/local/etc/php-fpm.conf test is successful' in php_conf.output.decode()
+# php_proc = php.exec_run("ps aux |grep php-fpm")
+# assert 'php-fpm: master process (/usr/local/etc/php-fpm.conf)' in php_proc.output.decode()
+# assert 'fpm is running, pid' in php.logs()
+
+# PHP-APACHE2
+php = client.containers.get('mautic')
 php_log = php.logs()
-print(php_log.decode())
 assert php.status == 'running'
-php_conf = php.exec_run("php-fpm -t")
-assert 'configuration file /usr/local/etc/php-fpm.conf test is successful' in php_conf.output.decode()
-php_proc = php.exec_run("ps aux |grep php-fpm")
-assert 'php-fpm: master process (/usr/local/etc/php-fpm.conf)' in php_proc.output.decode()
-assert 'fpm is running, pid' in php.logs()
+assert 'Complete! Mautic has been successfully copied to /var/www/html' in php_log.decode()
+php_proc = php.exec_run("sh -c 'ps aux|grep apache2'")
+assert 'apache2 -DFOREGROUND' in php_proc.output.decode()
+ss = php.exec_run("sh -c 'ss -tlpn'")
+assert '"apache2",pid=1' in ss.output.decode()
+assert '*:80' in ss.output.decode()
+assert '*:443' in ss.output.decode()
 
-# mysql = client.containers.get('db')
-# assert mysql.status == 'running'
-# mycnf = mysql.exec_run("/usr/sbin/mysqld --verbose  --help")
-# assert '/usr/sbin/mysqld  Ver 5.7.26' in mycnf.output.decode()
-# mysql_log = mysql.logs()
-# assert "Ready to accept connections" in mysql_log.decode()
+# check redirect to web installer
+curl = php.exec_run("curl -i http://localhost")
+assert 'Location: http://localhost/index.php/installer' in curl.output.decode()
+# @todo run mautic unit test, first copy .env.dist to .env
+#php_conf = php.exec_run("bin/phpunit --bootstrap vendor/autoload.php --configuration app/phpunit.xml.dist")
 
-db = client.containers.get('mautic')
+db = client.containers.get('build_mauticdb_1')
 assert db.status == 'running'
-cnf = db.exec_run('psql -U symfony -h 127.0.0.1 -p 5432 -c "select 1"')
-print(cnf.output.decode())
-# assert '' in cnf.output.decode()
-log = db.logs()
-# assert "Ready to accept connections" in log.decode()
-
-mq = client.containers.get('mq')
-assert mq.status == 'running'
-logs = mq.logs()
-assert 'Server startup complete; 3 plugins started' in logs.decode()
+cnf = db.exec_run("/usr/sbin/mysqld --verbose  --help")
+assert 'mysqld  Ver 5.6' in cnf.output.decode()
+db_log = db.logs()
+assert "mysqld: ready for connections" in db_log.decode()
 
 for c in client.containers.list():
     assert c.status == 'running'
 
-#response = requests.get("http://127.0.0.1:9000")
-#assert response.status_code == 200
 
