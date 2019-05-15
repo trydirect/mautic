@@ -1,9 +1,0 @@
-version: "2"
-
-services:
-
-  mautic:
-    image: try.direct/mautic:2.15.0
-    build: .
-    container_name: mautic
-    restart: always
