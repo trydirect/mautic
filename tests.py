@@ -31,16 +31,6 @@ apache.restart()
 time.sleep(3)
 assert apache.status == 'running'
 
-# # PHP-FPM
-# php = client.containers.get('php')
-# php_log = php.logs()
-# assert php.status == 'running'
-# php_conf = php.exec_run("php-fpm -t")
-# assert 'configuration file /usr/local/etc/php-fpm.conf test is successful' in php_conf.output.decode()
-# php_proc = php.exec_run("ps aux |grep php-fpm")
-# assert 'php-fpm: master process (/usr/local/etc/php-fpm.conf)' in php_proc.output.decode()
-# assert 'fpm is running, pid' in php.logs()
-
 # PHP-APACHE2
 php = client.containers.get('mautic')
 php_log = php.logs()

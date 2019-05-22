@@ -10,10 +10,10 @@ services:
     image: mysql:5.6
     restart: always
     environment:
-         MYSQL_ROOT_PASSWORD: {{mapass}}
+         MYSQL_ROOT_PASSWORD: mauticroot
          MYSQL_DATABASE: mautic
          MYSQL_USER: root
-         MYSQL_PASSWORD: {{mapass}}
+         MYSQL_PASSWORD: mautic
     volumes:
          - mautic-db:/var/lib/mysql
   mautic:
@@ -27,5 +27,5 @@ services:
       MAUTIC_DB_HOST: mauticdb
       MYSQL_PORT_3306_TCP: 3306
       MAUTIC_DB_USER: root
-      MAUTIC_DB_PASSWORD: {{mapass}}
+      MAUTIC_DB_PASSWORD: mautic
       MAUTIC_DB_NAME: mautic

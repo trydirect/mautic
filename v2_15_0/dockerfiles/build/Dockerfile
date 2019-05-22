@@ -25,11 +25,11 @@ cron vim curl wget git && phpenmod mcrypt mysql xsl gd intl curl imap imap-ssl k
 RUN rm -rf /var/lib/apt/lists/*
 
 # Add the Apache virtual host file
-ADD config/apache_default_vhost_ssl /etc/apache2/sites-available/ssl.conf
 ADD config/apache_default_vhost /etc/apache2/sites-available/demo.loc.conf
+ADD config/apache_default_vhost_ssl /etc/apache2/sites-available/ssl.conf
+RUN rm -f /etc/apache2/sites-enabled/000-default.conf
 COPY config/ports.conf /etc/apache2/ports.conf
 
-RUN rm -f /etc/apache2/sites-enabled/000-default.conf
 
 RUN a2ensite demo.loc.conf
 RUN a2ensite ssl.conf
@@ -44,7 +44,7 @@ RUN chmod +x /usr/local/bin/apache2-foreground
 WORKDIR /var/www/html
 
 # Define Mautic version and expected SHA1 signature
-ENV MAUTIC_VERSION=2.12.2
+ENV MAUTIC_VERSION=2.15.0
 ENV MAUTIC_SHA1=eec5676cc242b32142b6efcf0c44edc8b16fdd63
 
 # Download package and extract to web volume
@@ -53,7 +53,13 @@ RUN git clone https://github.com/mautic/mautic.git
 
 WORKDIR /usr/src/mautic
 RUN git fetch --all --tags
-RUN git checkout tags/2.12.2 -b 2.12.2
+RUN git checkout tags/2.15.0 -b 2.15.0
+
+RUN sed -i -e "s/;cgi.fix_pathinfo\s*=\s*1/cgi.fix_pathinfo = 0/g; s/expose_php\s*=\s*On/expose_php = Off/g" \
+/etc/php/7.0/apache2/php.ini
+RUN sed -i -e "s/expose_php\s*=\s*On/expose_php = Off/g" /etc/php/7.0/apache2/php.ini
+RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g; s/post_max_size\s*=\s*8M/post_max_size = 100M/g" \
+/etc/php/7.0/apache2/php.ini
 
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
@@ -73,7 +79,6 @@ RUN chmod a+x /update_geolite.sh
 RUN apt-get update
 RUN touch /etc/cron.d/mautic-cronjobs
 RUN /bin/bash -c crontab -l > /etc/cron.d/mautic-cronjobs
-RUN touch /var/log/cron.log
 RUN touch /var/log/cron.log && \
     chown mautic. /var/log/cron.log && \
     chown -R mautic. /var/run/ && \
@@ -82,9 +87,7 @@ RUN touch /var/log/cron.log && \
 RUN echo '* 2 10 * *  mautic /bin/sh /update_geolite.sh >/dev/null 2>&1' >> /etc/cron.d/mautic-cronjobs
 RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:segments:update --env=prod' >> /etc/cron.d/mautic-cronjobs
 RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:campaigns:rebuild --env=prod' >> /etc/cron.d/mautic-cronjobs
-RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:campaigns:trigger --env=prod' >> /etc/cron.d/mautic-cronjobs
-RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:emails:process --env=prod' >> /etc/cron.d/mautic-cronjobs
-RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:email:fetch --env=prod' >> /etc/cron.d/mautic-cronjobs
+RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:emails:send --env=prod' >> /etc/cron.d/mautic-cronjobs
 RUN echo '* * * * * mautic echo "Mautic cronjob check" >> /var/log/cron.log 2>&1' >> /etc/cron.d/mautic-cronjobs
 
 RUN crontab /etc/cron.d/mautic-cronjobs
@@ -99,7 +102,6 @@ RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN service cron restart
-
 USER mautic
 ENTRYPOINT ["/entrypoint.sh"]
 
