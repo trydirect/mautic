@@ -1,4 +1,4 @@
-<VirtualHost *:443>
+<VirtualHost *:4443>
   ServerName ${APACHE_SERVER_NAME}
   DocumentRoot /var/www/html
   <Directory /var/www/html>
