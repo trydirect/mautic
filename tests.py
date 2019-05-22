@@ -29,6 +29,7 @@ assert 'HTTP/1.1" 500' not in nginx.logs()
 # Apache
 apache = client.containers.get('mautic')
 cfg = apache.exec_run("apachectl -t")
+print(cfg.output.decode())
 assert apache.status == 'running'
 print(apache.logs())
 assert 'HTTP/1.1" 500' not in apache.logs()
