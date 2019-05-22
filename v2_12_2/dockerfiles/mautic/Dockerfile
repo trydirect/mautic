@@ -76,9 +76,8 @@ RUN /bin/bash -c crontab -l > /etc/cron.d/mautic-cronjobs
 RUN touch /var/log/cron.log
 RUN touch /var/log/cron.log && \
     chown mautic. /var/log/cron.log && \
-    touch /var/run/crond.pid && \
-    chown mautic. /var/run/crond.pid && \
-    systemctl enable cron
+    chown -R mautic. /var/run/ && \
+    chmod u+s /usr/bin/cron
 
 RUN echo '* 2 10 * *  mautic /bin/sh /update_geolite.sh >/dev/null 2>&1' >> /etc/cron.d/mautic-cronjobs
 RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:segments:update --env=prod' >> /etc/cron.d/mautic-cronjobs
@@ -106,4 +105,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 80
 EXPOSE 443
-CMD ["apache2-foreground"]
+CMD ["cron && apache2-foreground"]
