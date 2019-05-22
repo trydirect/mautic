@@ -14,13 +14,13 @@ client = docker.from_env()
 time.sleep(20)  # we expect all containers are up and running in 20 secs
 
 # NGINX
-# nginx = client.containers.get('nginx')
-# nginx_cfg = nginx.exec_run("/usr/sbin/nginx -T")
-# assert nginx.status == 'running'
-# assert 'server_name _;' in nginx_cfg.output.decode()
-# assert "error_log /proc/self/fd/2" in nginx_cfg.output.decode()
-# assert "location = /.well-known/acme-challenge/" in nginx_cfg.output.decode()
-# assert 'HTTP/1.1" 500' not in nginx.logs()
+nginx = client.containers.get('nginx')
+nginx_cfg = nginx.exec_run("/usr/sbin/nginx -T")
+assert nginx.status == 'running'
+assert 'server_name _;' in nginx_cfg.output.decode()
+assert "error_log /proc/self/fd/2" in nginx_cfg.output.decode()
+assert "location = /.well-known/acme-challenge/" in nginx_cfg.output.decode()
+assert 'HTTP/1.1" 500' not in nginx.logs()
 
 # Apache
 apache = client.containers.get('mautic')
@@ -55,7 +55,6 @@ assert 'apache2 -DFOREGROUND' in apache_proc.output.decode()
 ss = php.exec_run("sh -c 'ss -tlpn'")
 assert '"apache2",pid=1' in ss.output.decode()
 assert '*:80' in ss.output.decode()
-assert '*:443' in ss.output.decode()
 
 # check redirect to web installer
 curl = php.exec_run("curl -i http://localhost")
@@ -69,8 +68,3 @@ cnf = db.exec_run("/usr/sbin/mysqld --verbose  --help")
 assert 'mysqld  Ver 5.6' in cnf.output.decode()
 db_log = db.logs()
 assert "mysqld: ready for connections" in db_log.decode()
-
-for c in client.containers.list():
-    assert c.status == 'running'
-
-

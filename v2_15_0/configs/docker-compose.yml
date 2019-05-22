@@ -3,101 +3,16 @@ version: "2"
 volumes:
     mautic-db:
       driver: local
+    redis-db:
+      driver: local
 
 services:
-#
-#  mailu-http:
-#    image: ${REGISTRY}mailu/$FRONTEND:$VERSION
-#    restart: always
-#    env_file: .env
-#    ports:
-#      - "$BIND_ADDRESS:84:80"
-#      - "$BIND_ADDRESS:7444:443"
-#    volumes:
-#      - ./certs/ssl:/certs
 
   redis:
     image: redis:latest
     restart: always
     volumes:
-      - $ROOT/redis:/data
-
-#  imap:
-#    image: ${REGISTRY}mailu/dovecot:$VERSION
-#    restart: always
-#    env_file: .env
-#    ports:
-#      - "$BIND_ADDRESS:110:110"
-#      - "$BIND_ADDRESS:143:143"
-#      - "$BIND_ADDRESS:993:993"
-#      - "$BIND_ADDRESS:995:995"
-#      - "$BIND_ADDRESS:4190:4190"
-#    volumes:
-#      - $ROOT/data:/data
-#      - $ROOT/mail:/mail
-#      - ./certs/ssl:/certs
-#      - $ROOT/overrides:/overrides
-#
-#  smtp:
-#    image: ${REGISTRY}mailu/postfix:$VERSION
-#    restart: always
-#    env_file: .env
-#    ports:
-#      - "$BIND_ADDRESS:25:25"
-#      - "$BIND_ADDRESS:465:465"
-#      - "$BIND_ADDRESS:587:587"
-#    volumes:
-#      - "$ROOT/data:/data"
-#      - "$ROOT/certs:/certs"
-#      - "$ROOT/overrides:/overrides"
-#
-#  antispam:
-#    # build: rspamd
-#    image: ${REGISTRY}mailu/rspamd:$VERSION
-#    restart: always
-#    env_file: .env
-#    volumes:
-#      - "$ROOT/filter:/var/lib/rspamd"
-#
-#  antivirus:
-#    image: ${REGISTRY}mailu/clamav:$VERSION
-#    env_file: .env
-#    volumes:
-#      - "$ROOT/filter:/data"
-#
-#  webdav:
-#    image: ${REGISTRY}mailu/$WEBDAV:$VERSION
-#    restart: always
-#    env_file: .env
-#    volumes:
-#      - "$ROOT/dav:/data"
-#
-#  admin:
-#    image: ${REGISTRY}mailu/admin:$VERSION
-#    container_name: mailu_admin
-#    restart: always
-#    env_file: .env
-#    ports:
-#      - "$BIND_ADDRESS:8000:80"
-#    volumes:
-#      - "$ROOT/data:/data"
-#      - "$ROOT/dkim:/dkim"
-#      - "$ROOT/certs:/certs"
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
-#
-#  webmail:
-#    image: "${REGISTRY}mailu/$WEBMAIL:$VERSION"
-#    restart: always
-#    env_file: .env
-#    volumes:
-#      - "$ROOT/webmail:/data"
-#
-#  fetchmail:
-#    image: ${REGISTRY}mailu/fetchmail:$VERSION
-#    restart: always
-#    env_file: .env
-#    volumes:
-#      - "$ROOT/data:/data"
+      - redis-db:/data
 
   mauticdb:
     image: mysql:5.6
@@ -111,7 +26,7 @@ services:
          - mautic-db:/var/lib/mysql
 
   mautic:
-    image: ${REGISTRY}trydirect/mautic:2.15.0
+    image: trydirect/mautic:2.15.0
     container_name: mautic
     restart: always
     links:
@@ -127,18 +42,16 @@ services:
 
 # entry point
   nginx:
-    image: ${REGISTRY}trydirect/nginx:latest
+    image: trydirect/nginx:latest
     container_name: nginx
     restart: always
     depends_on:
       - mautic
-#      - mailu-http
     ports:
       - "80:80"
       - "443:443"
     links:
       - mautic
-#      - mailu-http
     volumes:
       - ./certs/ssl:/etc/nginx/ssl
       - ./certs/letsencrypt:/etc/letsencrypt
