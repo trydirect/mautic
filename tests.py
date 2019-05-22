@@ -8,7 +8,6 @@ import requests
 
 client = docker.from_env()
 
-
 # Testing Mautic build
 
 time.sleep(20)  # we expect all containers are up and running in 20 secs
@@ -26,8 +25,6 @@ time.sleep(20)  # we expect all containers are up and running in 20 secs
 apache = client.containers.get('mautic')
 cfg = apache.exec_run("apachectl -t")
 assert apache.status == 'running'
-# assert 'server_name _;' in nginx_cfg.output.decode()
-# assert "error_log /proc/self/fd/2" in nginx_cfg.output.decode()
 assert 'HTTP/1.1" 500' not in apache.logs()
 # test restart
 apache.restart()
