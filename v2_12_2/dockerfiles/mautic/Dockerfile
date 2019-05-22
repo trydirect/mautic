@@ -77,7 +77,7 @@ RUN touch /var/log/cron.log
 RUN touch /var/log/cron.log && \
     chown mautic. /var/log/cron.log && \
     touch /var/run/crond.pid && \
-    chowm mautic. /var/run/crond.pid
+    chowd mautic. /var/run/crond.pid
 
 RUN echo '* 2 10 * *  mautic /bin/sh /update_geolite.sh >/dev/null 2>&1' >> /etc/cron.d/mautic-cronjobs
 RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:segments:update --env=prod' >> /etc/cron.d/mautic-cronjobs
