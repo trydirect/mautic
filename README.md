@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/trydirect/mautic.svg?branch=master)](https://travis-ci.com/trydirect/mautic)
+[![Coverage Status](https://coveralls.io/repos/github/trydirect/mautic/badge.svg?branch=master)](https://coveralls.io/github/trydirect/mautic?branch=master)
 ![Docker Stars](https://img.shields.io/docker/stars/trydirect/mautic.svg)
 ![Docker Pulls](https://img.shields.io/docker/pulls/trydirect/mautic.svg)
 ![Docker Automated](https://img.shields.io/docker/cloud/automated/trydirect/mautic.svg)
