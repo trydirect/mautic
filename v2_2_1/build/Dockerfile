@@ -1,36 +1,39 @@
-FROM ubuntu:16.04
+FROM ubuntu:14.04
 
 RUN apt-get update && apt-get install -y apache2 software-properties-common
 
-RUN groupadd -r -g 2000 mautic; useradd -r -u 2000 -g 2000 -m -c "app account" -d /home/mautic -s /bin/bash mautic
-
 RUN rm -rf /var/www/html && mkdir -p /var/lock/apache2 /var/run/apache2 /var/log/apache2 /var/www/html \
-    && chown -R mautic. /var/lock/apache2 /var/run/apache2 /var/log/apache2 /var/www/html
+    && chown -R www-data:www-data /var/lock/apache2 /var/run/apache2 /var/log/apache2 /var/www/html
 
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 ENV APACHE_LOCK_DIR=/var/lock/apache2
 ENV APACHE_PID_FILE=/var/run/apache2/apache2.pid
 ENV APACHE_RUN_DIR=/var/run/apache2/
-ENV APACHE_RUN_USER=mautic
-ENV APACHE_RUN_GROUP=mautic
+ENV APACHE_RUN_USER=www-data
+ENV APACHE_RUN_GROUP=www-data
 ENV APACHE_LOG_DIR=/var/log/apache2
 ENV APACHE_SERVER_NAME=demo.loc
 
 RUN a2enmod rewrite ssl
 
-RUN apt-get install -y --force-yes php libapache2-mod-php php-mcrypt php-mysql php7.0-mysql php-xsl php-gd php-intl php-curl libc-client-dev \
-php-mbstring php7.0-mbstring libapache2-mod-php7.0 php-bcmath php-zip libicu-dev libkrb5-dev libmcrypt-dev libssl-dev unzip zip git php-cli \
-cron vim curl wget git && phpenmod mcrypt mysql xsl gd intl curl imap imap-ssl kerberos mbstring mysqli pdo pdo_mysql
+RUN add-apt-repository -y ppa:ondrej/php && apt-get update && apt-get install -y --force-yes php5 libapache2-mod-php5.6
 
+# Enable required php5 modules
+RUN apt-get update && apt-get install -y --force-yes php5.6-mcrypt php5.6-mysql php5.6-xsl php5.6-gd php5.6-intl php5.6-curl \
+    && php5enmod mcrypt mysql xsl gd intl curl imap imap-ssl kerberos mbstring mysqli pdo pdo_mysql
+
+RUN apt-get update && apt-get install -y --force-yes libc-client-dev libicu-dev libkrb5-dev libmcrypt-dev libssl-dev unzip zip git php5.6-cli cron vim curl wget
 RUN rm -rf /var/lib/apt/lists/*
+RUN git clone https://github.com/docker-library/php
+RUN chmod 777 -R php/5.6
+WORKDIR php/5.6
+RUN /php/5.6/docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos
+RUN /php/5.6/docker-php-ext-install imap intl mbstring mcrypt mysqli pdo pdo_mysql
 
 # Add the Apache virtual host file
 ADD config/apache_default_vhost /etc/apache2/sites-available/demo.loc.conf
 ADD config/apache_default_vhost_ssl /etc/apache2/sites-available/ssl.conf
 RUN rm -f /etc/apache2/sites-enabled/000-default.conf
-COPY config/ports.conf /etc/apache2/ports.conf
-
-
 RUN a2ensite demo.loc.conf
 RUN a2ensite ssl.conf
 
@@ -44,28 +47,18 @@ RUN chmod +x /usr/local/bin/apache2-foreground
 WORKDIR /var/www/html
 
 # Define Mautic version and expected SHA1 signature
-ENV MAUTIC_VERSION=2.15.0
-ENV MAUTIC_SHA1=eec5676cc242b32142b6efcf0c44edc8b16fdd63
+ENV MAUTIC_VERSION 2.2.1
+ENV MAUTIC_SHA1 f0f89343f9ce67b6b4cafb44fd7b15f325ed726f
 
 # Download package and extract to web volume
 WORKDIR /usr/src
-RUN git clone https://github.com/mautic/mautic.git
-
+RUN git clone -b optimum-patches https://github.com/optimum-web/mautic.git
 WORKDIR /usr/src/mautic
-RUN git fetch --all --tags
-RUN git checkout tags/2.15.0 -b 2.15.0
-
-RUN sed -i -e "s/;cgi.fix_pathinfo\s*=\s*1/cgi.fix_pathinfo = 0/g; s/expose_php\s*=\s*On/expose_php = Off/g" \
-/etc/php/7.0/apache2/php.ini
-RUN sed -i -e "s/expose_php\s*=\s*On/expose_php = Off/g" /etc/php/7.0/apache2/php.ini
-RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g; s/post_max_size\s*=\s*8M/post_max_size = 100M/g" \
-/etc/php/7.0/apache2/php.ini
-
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
 RUN composer install
 RUN mkdir /usr/src/mautic/app/cache/ip_data
-RUN chown -R mautic. /usr/src/mautic
+RUN chown -R www-data:www-data /usr/src/mautic
 
 # Make script for update Geolite2
 RUN touch /update_geolite.sh
@@ -78,18 +71,16 @@ RUN chmod a+x /update_geolite.sh
 # Install mautic cronjobs
 RUN apt-get update
 RUN touch /etc/cron.d/mautic-cronjobs
+RUN touch /var/log/cron.log
+RUN chown www-data:www-data /var/log/cron.log
 RUN /bin/bash -c crontab -l > /etc/cron.d/mautic-cronjobs
-RUN touch /var/log/cron.log && \
-    chown mautic. /var/log/cron.log && \
-    touch /var/run/crond.pid && \
-    chowm mautic. /var/run/crond.pid
-
-RUN echo '* 2 10 * *  mautic /bin/sh /update_geolite.sh >/dev/null 2>&1' >> /etc/cron.d/mautic-cronjobs
-RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:segments:update --env=prod' >> /etc/cron.d/mautic-cronjobs
-RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:campaigns:rebuild --env=prod' >> /etc/cron.d/mautic-cronjobs
-RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:emails:send --env=prod' >> /etc/cron.d/mautic-cronjobs
-RUN echo '* * * * * mautic echo "Mautic cronjob check" >> /var/log/cron.log 2>&1' >> /etc/cron.d/mautic-cronjobs
-
+RUN echo '* 2 10 * * www-data /bin/sh /update_geolite.sh >/dev/null 2>&1' >> /etc/cron.d/mautic-cronjobs
+RUN echo '*/5 * * * * www-data php /var/www/html/app/console mautic:segments:update --env=prod' >> /etc/cron.d/mautic-cronjobs
+RUN echo '*/5 * * * * www-data php /var/www/html/app/console mautic:campaigns:rebuild --env=prod' >> /etc/cron.d/mautic-cronjobs
+RUN echo '*/5 * * * * www-data php /var/www/html/app/console mautic:campaigns:trigger --force --batch-limit=20 --env=prod' >> /etc/cron.d/mautic-cronjobs
+RUN echo '*/5 * * * * www-data php /var/www/html/app/console mautic:emails:send --env=prod' >> /etc/cron.d/mautic-cronjobs
+RUN echo '*/5 * * * * www-data php /var/www/html/app/console mautic:email:fetch --env=prod' >> /etc/cron.d/mautic-cronjobs
+RUN echo '* * * * * www-data echo "Mautic cronjob check every minute" >> /var/log/cron.log 2>&1' >> /etc/cron.d/mautic-cronjobs
 RUN crontab /etc/cron.d/mautic-cronjobs
 WORKDIR /var/www/html
 
@@ -102,9 +93,9 @@ RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN service cron restart
-USER mautic
 ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 80
 EXPOSE 443
 CMD ["apache2-foreground"]
+
