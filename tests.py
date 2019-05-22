@@ -12,6 +12,11 @@ client = docker.from_env()
 
 time.sleep(20)  # we expect all containers are up and running in 20 secs
 
+for c in client.containers.list():
+    print("{}: {}" .format(c.name, c.status))
+    if 'running' not in c.status:
+        print(c.logs())
+
 # # NGINX
 nginx = client.containers.get('nginx')
 nginx_cfg = nginx.exec_run("/usr/sbin/nginx -T")
