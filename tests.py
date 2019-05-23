@@ -52,15 +52,18 @@ ss = php.exec_run("sh -c 'ss -tlpn'")
 assert '"apache2",pid=1' in ss.output.decode()
 assert '*:80' in ss.output.decode()
 
-# check redirect to web installer
-curl = php.exec_run("curl -i http://localhost")
-assert 'Location: http://localhost/index.php/installer' in curl.output.decode()
-# @todo run mautic unit test, first copy .env.dist to .env
-#php_conf = php.exec_run("bin/phpunit --bootstrap vendor/autoload.php --configuration app/phpunit.xml.dist")
-
 db = client.containers.get('db')
 assert db.status == 'running'
 cnf = db.exec_run("/usr/sbin/mysqld --verbose  --help")
 assert 'mysqld  Ver 5.6' in cnf.output.decode()
 db_log = db.logs()
 assert "mysqld: ready for connections" in db_log.decode()
+
+# check redirect to web installer
+curl = php.exec_run("curl -i http://localhost")
+print(curl.output.decode())
+php_log = php.logs()
+print(php_log)
+assert 'Location: http://localhost/index.php/installer' in curl.output.decode()
+# @todo run mautic unit test, first copy .env.dist to .env
+#php_conf = php.exec_run("bin/phpunit --bootstrap vendor/autoload.php --configuration app/phpunit.xml.dist")
