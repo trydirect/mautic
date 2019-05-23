@@ -28,6 +28,7 @@ RUN rm -rf /var/lib/apt/lists/*
 ADD config/apache_default_vhost_ssl /etc/apache2/sites-available/ssl.conf
 ADD config/apache_default_vhost /etc/apache2/sites-available/demo.loc.conf
 COPY config/ports.conf /etc/apache2/ports.conf
+COPY entrypoint.sh /entrypoint.sh
 
 RUN rm -f /etc/apache2/sites-enabled/000-default.conf
 
@@ -77,7 +78,8 @@ RUN touch /var/log/cron.log
 RUN touch /var/log/cron.log && \
     chown mautic. /var/log/cron.log && \
     chown -R mautic. /var/run/ && \
-    chmod u+s /usr/sbin/cron
+    chmod u+s /usr/sbin/cron && \
+    chmod +x /entrypoint.sh
 
 RUN echo '* 2 10 * *  mautic /bin/sh /update_geolite.sh >/dev/null 2>&1' >> /etc/cron.d/mautic-cronjobs
 RUN echo '*/5 * * * * mautic php /var/www/html/app/console mautic:segments:update --env=prod' >> /etc/cron.d/mautic-cronjobs
@@ -105,4 +107,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 80
 EXPOSE 443
-CMD ["cron && apache2-foreground"]
+CMD ["apache2-foreground"]
