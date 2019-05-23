@@ -20,9 +20,8 @@ RUN a2enmod rewrite ssl
 
 RUN apt-get install -y --force-yes php libapache2-mod-php php-mcrypt php-mysql php7.0-mysql php-xsl php-gd php-intl php-curl libc-client-dev \
 php-mbstring php7.0-mbstring libapache2-mod-php7.0 php-bcmath php-zip libicu-dev libkrb5-dev libmcrypt-dev libssl-dev unzip zip git php-cli \
-cron vim curl wget git && phpenmod mcrypt mysql xsl gd intl curl imap imap-ssl kerberos mbstring mysqli pdo pdo_mysql
-
-RUN rm -rf /var/lib/apt/lists/*
+cron curl wget git && phpenmod mcrypt mysql xsl gd intl curl imap imap-ssl kerberos mbstring mysqli pdo pdo_mysql \
+&& apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Add the Apache virtual host file
 ADD config/apache_default_vhost /etc/apache2/sites-available/demo.loc.conf
@@ -97,6 +96,7 @@ WORKDIR /var/www/html
 COPY docker-entrypoint.sh /entrypoint.sh
 COPY makeconfig.php /makeconfig.php
 COPY makedb.php /makedb.php
+COPY apache2-foreground /
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

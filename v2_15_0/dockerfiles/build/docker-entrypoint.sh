@@ -66,7 +66,8 @@ if ! [ -e app/config/local.php ]; then
         php /makeconfig.php "$MAUTIC_DB_HOST" "$MAUTIC_DB_USER" "$MAUTIC_DB_PASSWORD" "$MAUTIC_DB_NAME"
 
         # Make sure our web user owns the config file if it exists
-        chown www-data:www-data app/config/local.php
+        #chown www-data:www-data app/config/local.php
+        chown mautic.mautic app/config/local.php
 fi
 cron
 exec "$@"
