@@ -69,5 +69,5 @@ if ! [ -e app/config/local.php ]; then
         #chown www-data:www-data app/config/local.php
         chown mautic.mautic app/config/local.php
 fi
-
+cron
 exec "$@"
