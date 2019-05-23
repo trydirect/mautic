@@ -31,8 +31,10 @@ notifications:
   slack:
     rooms:
       - optimum-team:GycletOWK4Kt95GktwYwfUMp#build
-# safelist
-#branches:
-#  only:
-#    - master
-#    - autotests-travis
+
+
+after_success:
+  - cd v2_15_0/configs
+  - echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+  - docker-compose images
+  - docker push trydirect/mautic:2.15.0
