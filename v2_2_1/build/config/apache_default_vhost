@@ -1,4 +1,4 @@
-<VirtualHost *:80>
+<VirtualHost *:8080>
   ServerName ${APACHE_SERVER_NAME}
   DocumentRoot /var/www/html
   <Directory /var/www/html>
