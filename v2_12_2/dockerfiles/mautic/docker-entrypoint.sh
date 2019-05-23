@@ -68,5 +68,5 @@ if ! [ -e app/config/local.php ]; then
         # Make sure our web user owns the config file if it exists
         chown www-data:www-data app/config/local.php
 fi
-
+cron
 exec "$@"
