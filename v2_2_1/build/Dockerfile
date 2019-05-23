@@ -99,7 +99,6 @@ COPY makedb.php /makedb.php
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN service cron restart
 USER mautic
 ENTRYPOINT ["/entrypoint.sh"]
 
