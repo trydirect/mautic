@@ -1,0 +1,59 @@
+version: "2"
+
+volumes:
+  mautic-db:
+    driver: local
+  redis-data:
+    driver: local
+
+services:
+
+  redis:
+    image: redis:latest
+    restart: always
+    volumes:
+      - redis-data:/data
+
+  db:
+    image: mysql:5.6
+    container_name: db
+    restart: always
+    env_file: .env
+    volumes:
+      - mautic-db:/var/lib/mysql
+
+  mautic:
+    image: trydirect/mautic:2.15.0
+    build: .
+    container_name: mautic
+    restart: always
+    links:
+      - db
+      - redis
+    ports:
+      - "80"
+    env_file: .env
+#    volumes:
+#      - "./mautic:/var/www/html"
+
+  # entry point
+  nginx:
+    image: trydirect/nginx
+    container_name: nginx
+    restart: always
+    depends_on:
+      - mautic
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - mautic
+    volumes:
+      - ./certs/ssl:/etc/nginx/ssl
+      - ./certs/letsencrypt:/etc/letsencrypt
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./supervisord:/etc/supervisor/conf.d/
+      - ./cron/nginx:/var/spool/cron/crontabs
+    entrypoint: /usr/bin/supervisord -c /etc/supervisor/supervisord.conf -n
+

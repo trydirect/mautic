@@ -9,7 +9,7 @@ before_install:
 - pip install docker-compose --upgrade
 - docker-compose --version
 install:
-- cd v2_15_0/dockerfiles/build
+- cd v2_15_2/dockerfiles/build
 - docker-compose build
 - docker-compose up -d
 - docker-compose ps
@@ -24,10 +24,10 @@ notifications:
     rooms:
     - optimum-team:GycletOWK4Kt95GktwYwfUMp#build
 after_success:
-- cd v2_15_0/configs
+- cd v2_15_2/configs
 - echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 - docker-compose images
-- docker push trydirect/mautic:2.15.0
+- docker push trydirect/mautic:2.15.2
 env:
   global:
   - secure: Jvig/LWsr7s6veMcm29XIa9ou+anvs8osVvhgNNcbxz4z5yF+j7LL163ZD9hzuEF7Jg+uToCFTkPFTcc5AptAa482UjfycjLyckc+qwLhsSG6JvTDiXHfRD8GgurShLce9GcAeaeRdY1il40oSAQ9dVWQZ41QI4TeX5lfGE5BJ4AggpfPLC6Mx5/7TdalLGQX0djbQiE+HwioWfVCIP2KG/LWat67XBvRj3UkCtaQNWm4W6YmF9Cl+a3zUdWK2hRNKmbvTdQplL29QvQK7xJ3aF6UX6fY7zneYlLy5nNgsZXPIHFV5pu1cfQuCgwf5Y53VPtBaTNv8v5IOSiZoPfHdt2amrBKyBE6UeajPvFplsH/jUKzSRAPYH1yLd3bPgDJdW9pe/Lm+P2qynNyG1lyK7McHb4nhr73mCl+pWFXlWZcEH51ORL3vjnnBpWOnyWEXqRXBqCr/7/mvVskbpcIFUxUkVrMkFFncmxshddMOs40gRUlCIDPl72/UHgqz1QBWZKr+3AD1Vzw1FZZc+lnS1gCSn8Rf0udlLkTgH/wmwiH4jmQpBcgnTs47AcpbaQQXpipB79k9NAisZTjWi7f1JFHRC4in2quFOwxRSyHtPYaS5yxlJhPZz3VflZhmmvnRi1w3mmo6C0nHPXfGgj6NEqlMiMuICQy7jrVMkpjs0=

@@ -1,0 +1,24 @@
+<VirtualHost *:4443>
+  ServerName ${APACHE_SERVER_NAME}
+  DocumentRoot /var/www/html
+  <Directory /var/www/html>
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Order allow,deny
+    allow from all
+  </Directory>
+
+
+     LogLevel warn
+     #ErrorLog ${APACHE_LOG_DIR}/error.log
+     ErrorLog /dev/stderr
+
+     # CustomLog ${APACHE_LOG_DIR}/access.log combined
+     CustomLog /dev/stdout combined
+     TransferLog /dev/stdout
+
+  SSLEngine on
+  SSLCertificateFile "/etc/apache2/ssl/demo.loc.crt"
+  SSLCertificateKeyFile "/etc/apache2/ssl/demo.loc.key"
+
+</VirtualHost>
