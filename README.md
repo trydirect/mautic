@@ -29,6 +29,12 @@ $ docker-compose up -d
 ```
 
 
+## Quick deployment to cloud
+##### Amazon AWS, Digital Ocean, Hetzner and others
+[<img src="https://img.shields.io/badge/quick%20deploy|2.15.0-%40try.direct-brightgreen.svg">](https://try.direct/server/user/deploy/Im1hdXRpYzIxNXw2fDEzIg.EAoFeA.K37kJHzswFXMu9hE7JtAYvaduMI/)
+
+
+
 # Contributing
 
 1. Fork it (https://github.com/trydirect/mautic/fork)
