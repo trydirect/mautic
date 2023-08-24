@@ -31,7 +31,7 @@ $ docker-compose up -d
 
 ## Quick deployment to the Hetzner Cloud.  
 ##### We will use latest available version of image at TryDirect, it can be a little different
-[<img src="https://img.shields.io/badge/quick%20deploy-%40try.direct-brightgreen.svg">](https://try.direct/server/user/deploy/Im1hdXRpY3w2fDUyIg.F8jIUg.2M2LHmX9uyaeGTSPElexqyBxhY4/)
+[<img src="https://img.shields.io/badge/quick%20deploy-%40try.direct-brightgreen.svg">](https://try.direct/server/user/deploy/Im1hdXRpY3w2fDU1Ig.F8jvDw.fz8R6vfCPY_xhNRse-MYL2mbHKM/)
 
 
 
